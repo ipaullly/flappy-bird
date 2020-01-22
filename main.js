@@ -12,22 +12,20 @@ initialYAxisOffset = [];
 window.onload = () => {
   let config = {
     type: Phaser.AUTO,
+    autoStart: true,
     width: 600,
     height: 400,
     physics: {
       default: 'arcade',
       arcade: {
-        gravity: { y: 300 },
+        gravity: { y: 500 },
         debug: false
       }
     },
     scene: [playGame],
   };
   
-  game = new Phaser.Game(config);
-  // window.focus();
-  // resize();
-  // window.addEventListener('resize', resize, false);
+  game = new Phaser.Game(config);  
 }
 
 class playGame extends Phaser.Scene {
@@ -99,6 +97,9 @@ class playGame extends Phaser.Scene {
       this.collisionCallback();
     }
     if (gameOver) {
+      this.input.on('pointerdown', () => this.scene.start('PlayGame'));
+    }
+    if (gameOver) {
       bird.body.setGravity(0);
       for (let i=0;i<3;i++) {
         bottom_pipe[i].body.setAllowGravity(false);
@@ -142,5 +143,18 @@ class playGame extends Phaser.Scene {
     bottom_pipe[1].body.enable = false;
     bottom_pipe[2].body.enable = false;
     this.onScreenText.setText('GAME OVER');
+    this.fallAndDie();
+  }
+  fallAndDie() {
+    this.tweens.add({
+      targets: [bird],
+      y: game.config.height + bird.displayHeight * 2,
+      duration: 500,
+      ease: 'Cubic.easeIn',
+      callbackScope: this,
+      onComplete: () => {
+        this.cameras.main.shake(800, 0.01);
+      }
+    })
   }
 }
